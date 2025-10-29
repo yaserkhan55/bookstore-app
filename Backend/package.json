@@ -2,12 +2,11 @@
   "name": "bookstore",
   "version": "1.0.0",
   "description": "mern project",
-  "main": "index.js",
+  "main": "backend/index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node backend/index.js",
+    "dev": "nodemon backend/index.js"
   },
   "repository": {
     "type": "git",
@@ -26,7 +25,6 @@
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mongobd": "^0.0.1-security.0",
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "nodemailer": "^7.0.6",
