@@ -1,0 +1,23 @@
+# <type>(<scope>): <short summary>
+# Example: feat(auth): add JWT-based login
+
+# Types:
+#   feat:     A new feature
+#   fix:      A bug fix
+#   style:    Formatting, missing semicolons, etc
+#   refactor: Code changes that neither fix a bug nor add a feature
+#   perf:     Performance improvements
+#   test:     Adding or correcting tests
+#   docs:     Documentation changes
+#   chore:    Build tasks, package updates, etc
+#   ui:       UI or design updates
+#   hotfix:   Quick fixes in production
+
+# Subject line should be under 72 characters
+# Use imperative mood (e.g., "add", "fix", "update")
+# Leave an empty line before body text if needed
+
+# Example body (optional):
+# - Improved dark mode text visibility in PaidBooks reader
+# - Added Purchased ribbon with gradient theme
+# - Updated TOC sidebar styling for better contrast

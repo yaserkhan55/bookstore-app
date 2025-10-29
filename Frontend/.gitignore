@@ -1,25 +1,43 @@
+# Node modules
+node_modules/
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+# Build outputs
+dist/
+build/
+coverage/
+
 # Logs
-logs
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-.env
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# System files
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+
+# Local environment data
+/.cache
+/.eslintcache
+
+# Backend uploads (if you store user images locally)
+uploads/
+public/uploads/
+
+# Lock files (optional, if you prefer clean dependency syncing)
+# package-lock.json
+# yarn.lock
+
+# Temporary data
+tmp/
+*.tmp
