@@ -6,11 +6,9 @@
       "use": "@vercel/node"
     },
     {
-      "src": "Frontend/vite.config.js",
+      "src": "Frontend/package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "Frontend/dist"
-      }
+      "config": { "distDir": "Frontend/dist" }
     }
   ],
   "routes": [
