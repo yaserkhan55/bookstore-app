@@ -1,29 +1,24 @@
 import express from "express";
-import Book from "../models/Book.model.js";
-import BookPurchase from "../models/BookPurchase.model.js";
-import User from "../models/User.js";
+import Purchase from "../models/Purchase.js"; // ✅ unified model
 import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// 📊 Dashboard data route
+/**
+ * 📊 Dashboard route
+ * Shows total number of books purchased by the logged-in user
+ */
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    // Count total users
-    const totalUsers = await User.countDocuments();
+    console.log("🟣 Fetching dashboard data for user:", req.user.id);
 
-    // Count total books
-    const totalBooks = await Book.countDocuments();
+    const totalPurchases = await Purchase.countDocuments({ userId: req.user.id });
 
-    // Count paid books (price > 0)
-    const totalPaidBooks = await Book.countDocuments({ price: { $gt: 0 } });
-
-    // Count total purchases by current user
-    const totalPurchases = await BookPurchase.countDocuments({ user: req.user.id });
+    console.log(`📘 User ${req.user.id} has purchased ${totalPurchases} book(s)`);
 
     return res.json({
       success: true,
-      data: { totalUsers, totalBooks, totalPaidBooks, totalPurchases },
+      data: { totalPurchases },
     });
   } catch (err) {
     console.error("💥 Dashboard error:", err);

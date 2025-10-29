@@ -1,17 +1,18 @@
-// backend/models/PaidBook.js
+// Backend/models/PaidBook.js
 import mongoose from "mongoose";
 
 const paidBookSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-  description: String,
-  coverImage: String,
-  category: String,
-  price: Number,
-  fileUrl: String,
+  title: { type: String, required: true },
+  author: { type: String },
+  cover: { type: String }, // ✅ matches your DB field
+  file: { type: String }, // ✅ matches your DB field
+  price: { type: Number, required: true },
+  isFree: { type: Boolean, default: false }, // ✅ included for completeness
+}, {
+  timestamps: true,
 });
 
-// Third param is the collection name
+// ✅ Use explicit collection name (your Mongo collection is "paidbooks")
 const PaidBook = mongoose.models.PaidBook || mongoose.model("PaidBook", paidBookSchema, "paidbooks");
 
 export default PaidBook;

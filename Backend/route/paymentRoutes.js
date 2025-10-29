@@ -1,10 +1,10 @@
+// routes/paymentRoutes.js
 import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import PaidBook from "../models/PaidBook.js"; // <-- make sure this path matches your model
+import PaidBook from "../models/PaidBook.js";
+import Purchase from "../models/Purchase.js"; // ✅ Correct unified model
 import { authMiddleware } from "../middleware/auth.js";
-import BookPurchase from "../models/BookPurchase.model.js";
-
 
 const router = express.Router();
 
@@ -18,14 +18,9 @@ router.post("/create-order", authMiddleware, async (req, res) => {
       return res.json({ success: false, message: "Missing bookId" });
     }
 
-    // 🟢 Flexible lookup: handles string or ObjectId
-    const book =
-      (await PaidBook.findOne({ _id: bookId })) ||
-      (await PaidBook.findOne({ _id: { $eq: bookId.toString() } })) ||
-      (await PaidBook.findOne({ _id: { $in: [bookId, bookId.toString()] } }));
-
+    const book = await PaidBook.findById(bookId);
     if (!book) {
-      console.error("❌ Paid book not found in DB:", bookId);
+      console.error("❌ Paid book not found:", bookId);
       return res.json({ success: false, message: "Paid book not found" });
     }
 
@@ -57,7 +52,7 @@ router.post("/create-order", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Verify payment
+// ✅ Verify payment & SAVE to DB
 router.post("/verify", authMiddleware, async (req, res) => {
   try {
     const {
@@ -79,10 +74,31 @@ router.post("/verify", authMiddleware, async (req, res) => {
     }
 
     console.log("✅ Payment verified for book:", bookId);
-    res.json({ success: true, message: "Payment verified successfully" });
+
+    // 🟢 Save the successful purchase
+    const newPurchase = await Purchase.create({
+      userId: req.user.id, // ✅ matches your Purchase model
+      bookId,
+      amount,
+      razorpay_order_id,
+      razorpay_payment_id,
+      status: "success",
+    });
+
+    console.log("💾 Purchase saved:", newPurchase._id);
+
+    res.json({
+      success: true,
+      message: "Payment verified and purchase saved successfully",
+      purchase: newPurchase,
+    });
   } catch (error) {
     console.error("❌ Payment verification failed:", error);
-    res.json({ success: false, message: "Verification failed" });
+    res.json({
+      success: false,
+      message: "Verification failed",
+      error: error.message,
+    });
   }
 });
 

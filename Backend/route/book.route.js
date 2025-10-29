@@ -1,10 +1,15 @@
-// routes/book.route.js  ✅ Deployment-ready (remote file URL)
+// routes/book.route.js ✅ Handles both local & remote files
 
 import express from "express";
 import mongoose from "mongoose";
 import Book from "../models/Book.model.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const makeAnchorId = (title = "") =>
   title
@@ -24,7 +29,7 @@ const getBookById = async (id) => {
   return await Book.findById(id);
 };
 
-// 📚 all books
+// 📚 Get all books
 router.get("/", async (req, res) => {
   try {
     const books = await Book.find({});
@@ -39,23 +44,36 @@ router.get("/", async (req, res) => {
       }))
     );
   } catch (err) {
-    console.error(err);
+    console.error("💥 Error fetching books:", err);
     res.status(500).json({ error: "Failed to fetch books" });
   }
 });
 
-// 📖 read book from URL
+// 📖 Read a book (local file or remote URL)
 router.get("/read/:id", async (req, res) => {
   try {
     const book = await getBookById(req.params.id);
     if (!book || !book.file)
       return res.status(404).json({ error: "Book not found" });
 
-    const response = await fetch(book.file);
-    if (!response.ok)
-      return res.status(404).json({ error: "Failed to fetch remote book file" });
-    const text = await response.text();
+    let text = "";
 
+    // 🟣 Case 1: Remote file (http/https)
+    if (book.file.startsWith("http")) {
+      const response = await fetch(book.file);
+      if (!response.ok)
+        return res.status(404).json({ error: "Failed to fetch remote book file" });
+      text = await response.text();
+    } else {
+      // 🟣 Case 2: Local file (like 'sherlock.txt')
+      const filePath = path.join(__dirname, "..", "books", path.basename(book.file));
+      console.log("📘 Reading local file:", filePath);
+      if (!fs.existsSync(filePath))
+        return res.status(404).json({ error: "Book file not found" });
+      text = fs.readFileSync(filePath, "utf8");
+    }
+
+    // 🧠 Split text into paragraphs & chapters
     const rawParas = text
       .split(/\r?\n\r?\n+/)
       .map((p) => p.replace(/\r?\n/g, " ").trim())
@@ -91,7 +109,7 @@ router.get("/read/:id", async (req, res) => {
       chapters,
     });
   } catch (err) {
-    console.error(err);
+    console.error("💥 Error reading book:", err);
     res.status(500).json({ error: "Failed to read book" });
   }
 });

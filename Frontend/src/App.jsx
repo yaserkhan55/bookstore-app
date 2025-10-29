@@ -12,16 +12,15 @@ import Contact from "./components/Contact";
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./context/PrivateRoute";
 import MyPurchases from "./components/MyPurchases";
-
-// Free Books Component
 import BookCards from "./components/BookCards";
-
-// Paid Books Component
 import PaidBooks from "./components/PaidBooks";
 
 function App() {
-  // Initialize userId if not set
-  if (!localStorage.getItem("userId") || localStorage.getItem("userId") === "undefined") {
+  // ✅ Ensure userId exists in localStorage
+  if (
+    !localStorage.getItem("userId") ||
+    localStorage.getItem("userId") === "undefined"
+  ) {
     localStorage.setItem("userId", "64f8c2a1aa9c6302c2bfb262");
     console.log("✅ userId initialized in localStorage");
   }
@@ -31,55 +30,62 @@ function App() {
       <Navbar />
 
       <div className="pt-20 flex-grow">
-        
         <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-<Route path="/purchases" element={<MyPurchases />} />
-          {/* Free Books */}
-          <Route
-            path="/books"
-            element={
-              <PrivateRoute>
-                <BookCards />
-              </PrivateRoute>
-            }
-          />
+  <Route path="/" element={<Home />} />
+  <Route path="/signup" element={<Signup />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/about" element={<About />} />
+  <Route path="/contact" element={<Contact />} />
 
-          {/* Paid Books */}
-          <Route
-            path="/paid-books"
-            element={
-              <PrivateRoute>
-                <PaidBooks />
-              </PrivateRoute>
-            }
-          />
+  <Route
+    path="/dashboard"
+    element={
+      <PrivateRoute>
+        <Dashboard />
+      </PrivateRoute>
+    }
+  />
 
-          {/* Auth Routes */}
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
+  <Route
+    path="/purchases"
+    element={
+      <PrivateRoute>
+        <MyPurchases />
+      </PrivateRoute>
+    }
+  />
 
-          {/* Static Pages */}
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+  <Route
+    path="/books"
+    element={
+      <PrivateRoute>
+        <BookCards />
+      </PrivateRoute>
+    }
+  />
 
-          {/* Private Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
+  <Route
+    path="/paid-books"
+    element={
+      <PrivateRoute>
+        <PaidBooks />
+      </PrivateRoute>
+    }
+  />
 
-          {/* Users Route */}
-          <Route path="/users" element={<Dashboard />} />
+  {/* ✅ NEW ROUTE for reading purchased book */}
+  <Route
+    path="/paid-books/read/:bookId"
+    element={
+      <PrivateRoute>
+        <PaidBooks />
+      </PrivateRoute>
+    }
+  />
 
-          {/* 404 Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+  <Route path="*" element={<Navigate to="/" replace />} />
+</Routes>
+
       </div>
 
       <Footer />

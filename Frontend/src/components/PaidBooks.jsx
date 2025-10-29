@@ -14,9 +14,9 @@ export default function PaidBooks() {
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-  const { bookId } = useParams(); // 🆕 Get bookId from URL
+  const { bookId } = useParams();
 
-  // 🟣 Fetch Paid Books + User Purchases
+  // 🔹 Fetch Paid Books + User Purchases
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -49,17 +49,15 @@ export default function PaidBooks() {
     fetchData();
   }, [token]);
 
-  // 🟣 If URL has /paid-books/:bookId, auto-open that book
+  // 🔹 Auto-open book if /paid-books/:bookId
   useEffect(() => {
     if (bookId && books.length > 0) {
       const foundBook = books.find((b) => b._id === bookId);
-      if (foundBook) {
-        readBook(foundBook);
-      }
+      if (foundBook) readBook(foundBook);
     }
   }, [bookId, books]);
 
-  // 🟣 Search Filter
+  // 🔹 Search filter
   useEffect(() => {
     const query = searchQuery.toLowerCase();
     setFilteredBooks(
@@ -71,7 +69,7 @@ export default function PaidBooks() {
     );
   }, [searchQuery, books]);
 
-  // 🟣 Read full paid book
+  // 🔹 Read full paid book
   const readBook = async (book) => {
     try {
       const res = await fetch(`http://localhost:5000/api/paidBooks/read/${book._id}`, {
@@ -87,7 +85,7 @@ export default function PaidBooks() {
     }
   };
 
-  // 🟣 Buy / Read (Razorpay flow)
+  // 🔹 Buy / Read (Razorpay flow)
   const handleBuyOrRead = async (book) => {
     if (purchasedBookIds.includes(book._id)) {
       await readBook(book);
@@ -107,8 +105,7 @@ export default function PaidBooks() {
       });
 
       const orderData = await orderRes.json();
-      if (!orderRes.ok || !orderData.success)
-        throw new Error(orderData.message || "Order creation failed");
+      if (!orderData.success) throw new Error(orderData.message || "Order creation failed");
 
       const options = {
         key: orderData.key,
@@ -117,9 +114,10 @@ export default function PaidBooks() {
         name: "Bookstore",
         description: book.title,
         order_id: orderData.order.id,
+
+        // 🔹 Razorpay success handler
         handler: async (response) => {
           try {
-            // ✅ Step 1: verify payment
             const verifyRes = await fetch("http://localhost:5000/api/payments/verify", {
               method: "POST",
               headers: {
@@ -134,10 +132,12 @@ export default function PaidBooks() {
                 amount: book.price,
               }),
             });
-            const verifyData = await verifyRes.json();
-            if (!verifyData.success) throw new Error(verifyData.message || "Verification failed");
 
-            // ✅ Step 2: Save purchase in MongoDB
+            const verifyData = await verifyRes.json();
+            if (!verifyData.success)
+              throw new Error(verifyData.message || "Verification failed");
+
+            // 🔹 Record the purchase
             await fetch("http://localhost:5000/api/book-purchase", {
               method: "POST",
               headers: {
@@ -151,24 +151,38 @@ export default function PaidBooks() {
               }),
             });
 
-            // ✅ Step 3: Redirect user to purchased book
-            alert("✅ Payment successful! Redirecting to your new book...");
+            alert("✅ Payment successful! Opening your book...");
+
+            // Mark as purchased and open
             setPurchasedBookIds((prev) => [...prev, book._id]);
-            navigate(`/paid-books/${book._id}`); // 🆕 redirect to that book
+            localStorage.setItem("lastPaidBook", JSON.stringify(book));
+
+            // ✅ Open the book immediately (NO REDIRECT)
+            await readBook(book);
           } catch (err) {
             console.error("💥 Payment verify/save error:", err);
             alert(`Payment verification failed: ${err.message}`);
           }
         },
+
+        // ✅ THE FIX
+        redirect: false,
+        callback_url: undefined,
+
         prefill: { email: "user@example.com" },
         theme: { color: "#6B21A8" },
       };
 
       const rzp = new window.Razorpay(options);
+
       rzp.on("payment.failed", (response) => {
         console.error(response.error);
         alert(`Payment failed: ${response.error.description}`);
       });
+
+      // 🧠 Prevent unwanted reloads
+      window.onbeforeunload = null;
+
       rzp.open();
     } catch (err) {
       console.error(err);
@@ -180,11 +194,15 @@ export default function PaidBooks() {
 
   const backToList = () => {
     setSelectedBook(null);
-    navigate("/paid-books"); // 🆕 navigate back to list view
+    navigate("/paid-books");
   };
 
   const getCoverUrl = (cover) =>
-    cover?.startsWith("http") ? cover : cover ? `http://localhost:5000${cover}` : "/fallback-cover.jpg";
+    cover?.startsWith("http")
+      ? cover
+      : cover
+      ? `http://localhost:5000${cover}`
+      : "/fallback-cover.jpg";
 
   const scrollToChapter = (anchorId) => {
     const el = document.getElementById(anchorId);
@@ -198,19 +216,19 @@ export default function PaidBooks() {
     <div className="p-4 sm:p-6 max-w-6xl mx-auto">
       {!selectedBook ? (
         <>
-          {/* 🔍 Search Bar */}
-          <div className="mb-6 sm:mb-8 px-4 sm:px-0 flex justify-center">
+          {/* Search */}
+          <div className="mb-6 flex justify-center">
             <input
               type="text"
               placeholder="Search paid books..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full max-w-md px-4 py-3 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-slate-800 text-gray-800 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm sm:text-base"
+              className="w-full max-w-md px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
             />
           </div>
 
-          {/* 📚 Paid Book Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 sm:px-0">
+          {/* Books grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredBooks.map((book) => (
               <PaidBookCard
                 key={book._id}
@@ -223,89 +241,107 @@ export default function PaidBooks() {
           </div>
         </>
       ) : (
-        // 📖 Reader View
+        // Reader View
         <div className="max-w-5xl mx-auto relative flex flex-col lg:flex-row">
           {/* TOC */}
-          {selectedBook.chapters?.length > 0 && (
-            <aside className="hidden lg:block sticky top-28 left-0 h-[75vh] w-60 mr-8 overflow-y-auto rounded-xl shadow-md bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-gray-200/40 dark:border-gray-700/40 p-4 text-sm">
-              <h3 className="text-base font-semibold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-3 border-b border-gray-300/40 pb-1">
-                Contents
-              </h3>
-              <ul className="space-y-2">
-                {selectedBook.chapters.map((ch, i) => (
-                  <li key={i}>
-                    <button
-                      onClick={() => scrollToChapter(ch.anchorId)}
-                      className="text-left text-gray-700 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition-all text-sm sm:text-base w-full"
-                    >
-                      {ch.title.length > 40 ? ch.title.slice(0, 40) + "..." : ch.title}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </aside>
-          )}
+         {selectedBook.chapters?.length > 0 && (
+  <aside
+    className="hidden lg:block sticky top-28 left-0 h-[75vh] w-64 mr-8 overflow-y-auto rounded-2xl shadow-lg 
+    bg-white/90 dark:bg-slate-900/90 border border-gray-200 dark:border-slate-700 
+    backdrop-blur-md transition-all duration-300 p-5 text-sm"
+  >
+    <h3 className="text-base font-bold mb-4 border-b border-gray-300 dark:border-slate-700 
+    pb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+      📖 Contents
+    </h3>
+
+    <ul className="space-y-2">
+      {selectedBook.chapters.map((ch, i) => (
+        <li key={i}>
+          <button
+            onClick={() => scrollToChapter(ch.anchorId)}
+            className="w-full text-left truncate px-2 py-1 rounded-md 
+            text-gray-700 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 
+            hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors duration-200"
+          >
+            {ch.title.length > 40 ? ch.title.slice(0, 40) + "..." : ch.title}
+          </button>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}
+
 
           {/* Main Reader */}
-          <div className="flex-1 px-4 sm:px-0">
+          <div className="flex-1 px-4">
             <div className="flex justify-center mb-6">
               <button
                 onClick={backToList}
-                className="px-6 py-3 rounded-full font-semibold text-white bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 hover:brightness-110 shadow-md transition-all text-sm sm:text-base"
+                className="px-6 py-3 rounded-full font-semibold text-white bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 hover:brightness-110 shadow-md transition-all text-sm"
               >
                 ← Back to Paid Books
               </button>
             </div>
 
-            <div className="flex flex-col items-center text-center mb-8 sm:mb-10">
+            <div className="flex flex-col items-center text-center mb-8">
               <img
                 src={getCoverUrl(selectedBook.cover)}
                 alt={selectedBook.title}
-                className="w-60 sm:w-72 h-80 sm:h-96 object-cover shadow-2xl rounded-xl mb-6"
+                className="w-60 h-80 object-cover shadow-2xl rounded-xl mb-6"
               />
-              <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2 tracking-tight">
+              <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 mb-2">
                 {selectedBook.title}
               </h1>
               {selectedBook.author && (
-                <h4 className="text-sm sm:text-lg text-gray-600 dark:text-gray-300 italic mt-2">
-                  {selectedBook.author}
-                </h4>
+                <h4 className="text-sm text-gray-600 italic mt-2">{selectedBook.author}</h4>
               )}
             </div>
+            
+<div
+  className="prose dark:prose-invert max-w-none px-6 py-8 rounded-2xl shadow-inner 
+  bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 
+  text-base leading-relaxed transition-colors duration-300 border border-gray-200 dark:border-slate-700"
+>
+  {selectedBook.blocks?.map((block, idx) => {
+    if (block.type === "chapter") {
+      return (
+        <h2
+          key={idx}
+          id={block.anchorId}
+          className="text-2xl font-bold mt-10 mb-4 border-b pb-2 text-gray-900 dark:text-gray-100"
+        >
+          {block.title}
+        </h2>
+      );
+    }
 
-            <div className="prose dark:prose-invert max-w-none px-2 sm:px-10 py-8 sm:py-10 rounded-2xl shadow-inner bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-sm sm:text-base">
-              {selectedBook.blocks?.map((block, idx) => {
-                if (block.type === "chapter") {
-                  return (
-                    <h2
-                      key={idx}
-                      id={block.anchorId}
-                      className="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 mt-10 sm:mt-14 mb-4 sm:mb-6 tracking-tight border-b border-gray-300/50 pb-2 scroll-mt-24"
-                    >
-                      {block.title}
-                    </h2>
-                  );
-                }
-                if (block.type === "paragraph") {
-                  return (
-                    <p key={idx} className="mb-4 sm:mb-6 text-gray-800 dark:text-gray-200">
-                      {block.text}
-                    </p>
-                  );
-                }
-                if (block.type === "image") {
-                  return (
-                    <img
-                      key={idx}
-                      src={block.url}
-                      alt=""
-                      className="my-4 sm:my-8 mx-auto rounded-lg shadow-lg max-h-[300px] sm:max-h-[500px] w-full sm:w-auto object-contain"
-                    />
-                  );
-                }
-                return null;
-              })}
-            </div>
+    if (block.type === "paragraph") {
+      return (
+        <p
+          key={idx}
+          className="mb-4 text-gray-800 dark:text-gray-200 leading-relaxed"
+        >
+          {block.text}
+        </p>
+      );
+    }
+
+    if (block.type === "image") {
+      return (
+        <img
+          key={idx}
+          src={block.url}
+          alt=""
+          className="my-6 mx-auto rounded-lg shadow-lg max-h-[400px] border border-gray-300 dark:border-slate-700"
+        />
+      );
+    }
+
+    return null;
+  })}
+</div>
+
           </div>
         </div>
       )}

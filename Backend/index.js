@@ -80,7 +80,7 @@ app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/paidBooks", paidBookRoutes);
-// app.use("/api/purchases", purchaseRoutes);
+app.use("/api/purchases", purchaseRoutes);
 app.use("/api/book-purchase", bookPurchaseRoutes);
 
 // ✅ Health check (useful for debugging)
