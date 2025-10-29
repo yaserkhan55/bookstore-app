@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <title>Book Store</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+  <!-- ✅ Razorpay Script (load early) -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+
+  <!-- ✅ Optional: Global env helper (reads your .env React variable) -->
+  <script>
+    window.env = {
+      RAZORPAY_KEY_ID: import.meta.env?.VITE_RAZORPAY_KEY_ID || "YOUR_TEST_KEY_ID"
+    };
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- React entry point -->
+  <script type="module" src="/src/main.jsx"></script>
+
+  <!-- Optional: Add environment fallback -->
+  <script>
+    window.addEventListener("load", () => {
+      if (!window.Razorpay) {
+        console.error("❌ Razorpay script not loaded. Payments will not work!");
+      } else {
+        console.log("✅ Razorpay script loaded successfully");
+      }
+    });
+  </script>
+</body>
+
+</html>
