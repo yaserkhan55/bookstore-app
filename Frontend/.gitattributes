@@ -1,0 +1,29 @@
+# Handle line endings automatically for all text files
+* text=auto eol=lf
+
+# Treat JS, JSON, HTML, CSS, MD, and env files as text
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.json   text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.md     text eol=lf
+*.env    text eol=lf
+*.sh     text eol=lf
+
+# Binary files (no line ending conversion)
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.gz     binary
+
+# Keep backend migrations and shell scripts safe on Render/Linux
+*.sh text eol=lf
+*.sql text eol=lf
+
+# Make sure Windows users don't commit CRLF accidentally
+*.bat text eol=crlf
