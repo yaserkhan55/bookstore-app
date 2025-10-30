@@ -3,8 +3,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaMoneyBillWave } from "react-icons/fa";
+import { BASE_URL as API_BASE } from "../config.js"; // ✅ import from config.js
 
-const BASE_URL = "http://localhost:5000/api/dashboard";
+const DASHBOARD_URL = `${API_BASE}/api/dashboard`; // ✅ correct and isolated
+
 
 export default function Dashboard() {
   const [totalPurchases, setTotalPurchases] = useState(0);
@@ -18,7 +20,8 @@ export default function Dashboard() {
       setLoading(true);
       setError("");
       try {
-        const res = await axios.get(BASE_URL, {
+        const res = await axios.get(DASHBOARD_URL, {
+
           headers: { Authorization: token ? `Bearer ${token}` : undefined },
         });
 

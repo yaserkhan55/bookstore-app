@@ -1,4 +1,4 @@
-// backend/server.js
+// backend/index.js
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -37,13 +37,10 @@ connectDB()
   });
 
 // ✅ Enhanced CORS Configuration
-// ✅ Enhanced CORS Configuration
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "https://bookstore-frontend-beige-nu.vercel.app", // <-- change to your Vercel frontend URL
-  "https://bookstore-frontend-01.vercel.app",       // <-- add all frontend URLs you have
-  "https://bookstore-frontend-10.vercel.app"
+  "https://bookstore-app-frontend-v1.vercel.app"
 ];
 
 app.use(
@@ -54,12 +51,10 @@ app.use(
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-
 
 // ✅ Middleware
 app.use(express.json({ limit: "50mb" }));
@@ -83,14 +78,14 @@ app.use("/api/paidBooks", paidBookRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/book-purchase", bookPurchaseRoutes);
 
-// ✅ Health check (useful for debugging)
+// ✅ Health check (for debugging)
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", time: new Date().toISOString() });
 });
 
-// ✅ Serve Frontend (for production)
+// ✅ Serve frontend (only in production)
 if (process.env.NODE_ENV === "production") {
-  const clientBuildPath = path.join(__dirname, "../client/build");
+  const clientBuildPath = path.join(__dirname, "../Frontend/dist");
   app.use(express.static(clientBuildPath));
   app.get("*", (req, res) =>
     res.sendFile(path.join(clientBuildPath, "index.html"))
@@ -99,6 +94,8 @@ if (process.env.NODE_ENV === "production") {
   app.get("/", (req, res) => res.send("🟢 API running (Development mode)"));
 }
 
-// ✅ Start Server
-export default app;
-
+// ✅ Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

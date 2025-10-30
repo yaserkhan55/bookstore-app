@@ -4,10 +4,11 @@
   "description": "mern project",
   "main": "index.js",
   "type": "module",
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
-  },
+ "scripts": {
+  "start": "node Backend/index.js",
+  "dev": "nodemon Backend/index.js"
+},
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/akhil2k-lc/bookStoreApp.git"

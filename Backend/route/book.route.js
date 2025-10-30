@@ -1,4 +1,4 @@
-// routes/book.route.js ✅ Handles both local & remote files
+// routes/book.route.js ✅ Handles both local, remote & MongoDB-stored books
 
 import express from "express";
 import mongoose from "mongoose";
@@ -49,23 +49,41 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 📖 Read a book (local file or remote URL)
+// 📖 Read a book (local, remote, or JSON-stored)
 router.get("/read/:id", async (req, res) => {
   try {
     const book = await getBookById(req.params.id);
-    if (!book || !book.file)
-      return res.status(404).json({ error: "Book not found" });
+    if (!book) return res.status(404).json({ error: "Book not found" });
+
+    // 🟢 Case 1: Book already has structured content in MongoDB
+    if (book.chapters?.length || book.blocks?.length) {
+      return res.json({
+        _id: book._id,
+        title: book.title,
+        author: book.author,
+        cover: book.cover,
+        file: book.file,
+        isPaid: book.isPaid || false,
+        price: book.price || 0,
+        chapters: book.chapters || [],
+        blocks: book.blocks || [],
+      });
+    }
+
+    // 🟣 Case 2: Handle file or URL (as before)
+    if (!book.file)
+      return res.status(404).json({ error: "Book file not found" });
 
     let text = "";
 
-    // 🟣 Case 1: Remote file (http/https)
+    // Remote file (http/https)
     if (book.file.startsWith("http")) {
       const response = await fetch(book.file);
       if (!response.ok)
-        return res.status(404).json({ error: "Failed to fetch remote book file" });
+        return res.status(404).json({ error: "Failed to fetch remote file" });
       text = await response.text();
     } else {
-      // 🟣 Case 2: Local file (like 'sherlock.txt')
+      // Local file
       const filePath = path.join(__dirname, "..", "books", path.basename(book.file));
       console.log("📘 Reading local file:", filePath);
       if (!fs.existsSync(filePath))
@@ -73,7 +91,7 @@ router.get("/read/:id", async (req, res) => {
       text = fs.readFileSync(filePath, "utf8");
     }
 
-    // 🧠 Split text into paragraphs & chapters
+    // Split into paragraphs & chapters
     const rawParas = text
       .split(/\r?\n\r?\n+/)
       .map((p) => p.replace(/\r?\n/g, " ").trim())

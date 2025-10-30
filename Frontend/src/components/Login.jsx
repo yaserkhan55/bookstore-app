@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { BASE_URL as API_BASE } from "../config.js"; // ✅ import the base URL
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = `${API_BASE}/api`; // ✅ safe, works fine now
 
 function Login() {
   const navigate = useNavigate();

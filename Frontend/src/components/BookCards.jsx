@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { BASE_URL } from "../config";
 
 export default function BookCards() {
   const [books, setBooks] = useState([]);
@@ -8,7 +9,7 @@ export default function BookCards() {
 
   // Fetch all books
   useEffect(() => {
-    fetch("http://localhost:5000/api/books")
+    fetch(`${BASE_URL}/api/books`)
       .then((res) => res.json())
       .then((data) => {
         setBooks(data);
@@ -30,7 +31,7 @@ export default function BookCards() {
 
   // Read full book
   const readBook = (book) => {
-    fetch(`http://localhost:5000/api/books/read/${book._id}`)
+    fetch(`${BASE_URL}/api/books/read/${book._id}`)
       .then((res) => res.json())
       .then((data) => {
         setSelectedBook({ ...data, _id: book._id, file: book.file });
@@ -45,7 +46,7 @@ export default function BookCards() {
     cover?.startsWith("http")
       ? cover
       : cover
-      ? `http://localhost:5000${cover}`
+      ? `${BASE_URL}${cover}`
       : "/no-cover.png";
 
   const scrollToChapter = (anchorId) => {

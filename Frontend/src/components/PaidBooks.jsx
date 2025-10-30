@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PaidBookCard from "./PaidBookCard";
+import { BASE_URL } from "../config";
+
+
 
 export default function PaidBooks() {
   const [books, setBooks] = useState([]);
@@ -21,10 +24,10 @@ export default function PaidBooks() {
     const fetchData = async () => {
       try {
         const [booksRes, purchasesRes] = await Promise.all([
-          fetch("http://localhost:5000/api/paidBooks", {
+          fetch(`${BASE_URL}/api/paidBooks`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("http://localhost:5000/api/book-purchase/my", {
+          fetch(`${BASE_URL}/api/book-purchase/my`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -72,7 +75,7 @@ export default function PaidBooks() {
   // 🔹 Read full paid book
   const readBook = async (book) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/paidBooks/read/${book._id}`, {
+      const res = await fetch(`${BASE_URL}/api/paidBooks/read/${book._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to read book");
@@ -95,7 +98,7 @@ export default function PaidBooks() {
     setProcessingBookId(book._id);
 
     try {
-      const orderRes = await fetch("http://localhost:5000/api/payments/create-order", {
+      const orderRes = await fetch(`${BASE_URL}/api/payments/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -118,7 +121,7 @@ export default function PaidBooks() {
         // 🔹 Razorpay success handler
         handler: async (response) => {
           try {
-            const verifyRes = await fetch("http://localhost:5000/api/payments/verify", {
+            const verifyRes = await fetch(`${BASE_URL}/api/payments/verify`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -138,7 +141,7 @@ export default function PaidBooks() {
               throw new Error(verifyData.message || "Verification failed");
 
             // 🔹 Record the purchase
-            await fetch("http://localhost:5000/api/book-purchase", {
+            await fetch(`${BASE_URL}/api/book-purchase`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -201,7 +204,7 @@ export default function PaidBooks() {
     cover?.startsWith("http")
       ? cover
       : cover
-      ? `http://localhost:5000${cover}`
+      ? `${BASE_URL}${cover}`
       : "/fallback-cover.jpg";
 
   const scrollToChapter = (anchorId) => {
