@@ -1,9 +1,14 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node" }
+    { "src": "Backend/index.js", "use": "@vercel/node" },
+    { "src": "Frontend/vite.config.js", "use": "@vercel/static-build" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/api/index.js" }
-  ]
+    { "src": "/api/(.*)", "dest": "/Backend/index.js" },
+    { "src": "/(.*)", "dest": "/Frontend/dist/$1" }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
