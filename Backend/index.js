@@ -102,11 +102,10 @@ app.get("/api/health", (req, res) => {
 /* -------------------------------------------------------
    ✅ Frontend serving (Vercel-friendly)
    ------------------------------------------------------- */
+// ✅ Serve frontend (only in production)
 if (process.env.NODE_ENV === "production") {
   const clientBuildPath = path.join(__dirname, "../Frontend/dist");
   app.use(express.static(clientBuildPath));
-
-  // For SPA (React/Vite): always return index.html for unknown routes
   app.get("*", (req, res) =>
     res.sendFile(path.join(clientBuildPath, "index.html"))
   );
@@ -114,10 +113,5 @@ if (process.env.NODE_ENV === "production") {
   app.get("/", (req, res) => res.send("🟢 API running (Development mode)"));
 }
 
-/* -------------------------------------------------------
-   ✅ Server Start
-   ------------------------------------------------------- */
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// ✅ Export the app (for Vercel Serverless)
+export default app;
