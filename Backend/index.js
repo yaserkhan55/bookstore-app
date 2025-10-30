@@ -1,7 +1,6 @@
 // backend/index.js
 import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -36,39 +35,54 @@ connectDB()
     process.exit(1);
   });
 
-// ✅ Enhanced CORS Configuration
+/* -------------------------------------------------------
+   ✅ UNIVERSAL CORS FIX (Vercel + Local)
+   ------------------------------------------------------- */
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://bookstore-app-frontend-v1.vercel.app",
-  "https://bookstore-app-xhjc-git-main-yaser-ahmed-khans-projects.vercel.app" // ← یہ نیا origin شامل کریں
+  "https://bookstore-app-xhjc-git-main-yaser-ahmed-khans-projects.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      console.warn("❌ Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-// ✅ Middleware
+// Manual CORS headers to handle all preflight requests safely
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Authorization"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  // ✅ Handle OPTIONS requests immediately (CORS preflight)
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+/* -------------------------------------------------------
+   ✅ Express Middleware
+   ------------------------------------------------------- */
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Attach Razorpay instance
+// ✅ Attach Razorpay instance globally
 app.use((req, res, next) => {
   req.razorpay = razorpayInstance;
   next();
 });
 
-// ✅ API Routes
+/* -------------------------------------------------------
+   ✅ API Routes
+   ------------------------------------------------------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
@@ -80,15 +94,19 @@ app.use("/api/paidBooks", paidBookRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/book-purchase", bookPurchaseRoutes);
 
-// ✅ Health check (for debugging)
+// ✅ Health check route (for uptime monitoring / debugging)
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", time: new Date().toISOString() });
 });
 
-// ✅ Serve frontend (only in production)
+/* -------------------------------------------------------
+   ✅ Frontend serving (Vercel-friendly)
+   ------------------------------------------------------- */
 if (process.env.NODE_ENV === "production") {
   const clientBuildPath = path.join(__dirname, "../Frontend/dist");
   app.use(express.static(clientBuildPath));
+
+  // For SPA (React/Vite): always return index.html for unknown routes
   app.get("*", (req, res) =>
     res.sendFile(path.join(clientBuildPath, "index.html"))
   );
@@ -96,7 +114,9 @@ if (process.env.NODE_ENV === "production") {
   app.get("/", (req, res) => res.send("🟢 API running (Development mode)"));
 }
 
-// ✅ Start server
+/* -------------------------------------------------------
+   ✅ Server Start
+   ------------------------------------------------------- */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
