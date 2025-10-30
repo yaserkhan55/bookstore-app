@@ -2,11 +2,11 @@
   "name": "bookstore",
   "version": "1.0.0",
   "description": "mern project",
-  "main": "backend/index.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node backend/index.js",
-    "dev": "nodemon backend/index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
