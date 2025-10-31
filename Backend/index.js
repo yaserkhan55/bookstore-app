@@ -115,7 +115,8 @@ export default app;
 // 👇 Add this block so it runs locally too
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () =>
-    console.log(`🟢 Server running locally on port ${PORT}`)
-  );
+  app.listen(PORT, () => {
+    console.log(`🟢 Server running locally on port ${PORT}`);
+    console.log("✅ Vercel build refreshed at", new Date().toISOString());
+  });
 }
