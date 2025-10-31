@@ -38,30 +38,37 @@ connectDB()
 /* -------------------------------------------------------
    ✅ UNIVERSAL CORS FIX (Vercel + Local)
 ------------------------------------------------------- */
+
+/* -------------------------------------------------------
+   ✅ UNIVERSAL CORS FIX (Vercel + Local)
+   ------------------------------------------------------- */
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://bookstore-app-frontend-v1.vercel.app",
   "https://bookstore-app-xhjc-git-main-yaser-ahmed-khans-projects.vercel.app",
+  "https://bookstore-app-xhjc.vercel.app"
 ];
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+
   if (allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
   }
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-  );
+
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
 
+  // ✅ Always respond immediately to OPTIONS preflight requests
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    return res.status(200).end();
   }
+
   next();
 });
+
 
 /* -------------------------------------------------------
    ✅ Middleware
