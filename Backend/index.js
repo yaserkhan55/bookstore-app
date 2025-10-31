@@ -19,15 +19,15 @@ import paidBookRoutes from "./route/paidBook.route.js";
 import purchaseRoutes from "./route/purchase.route.js";
 import bookPurchaseRoutes from "./route/bookPurchase.route.js";
 
-import { authMiddleware } from "./middleware/auth.js";
-
 dotenv.config();
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Connect Database
+/* -------------------------------------------------------
+   ✅ Connect Database
+------------------------------------------------------- */
 connectDB()
   .then(() => console.log("✅ Database connected"))
   .catch((err) => {
@@ -37,7 +37,7 @@ connectDB()
 
 /* -------------------------------------------------------
    ✅ UNIVERSAL CORS FIX (Vercel + Local)
-   ------------------------------------------------------- */
+------------------------------------------------------- */
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
@@ -45,7 +45,6 @@ const allowedOrigins = [
   "https://bookstore-app-xhjc-git-main-yaser-ahmed-khans-projects.vercel.app",
 ];
 
-// Manual CORS headers to handle all preflight requests safely
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -55,13 +54,9 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Methods",
     "GET,POST,PUT,DELETE,PATCH,OPTIONS"
   );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type,Authorization"
-  );
+  res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
 
-  // ✅ Handle OPTIONS requests immediately (CORS preflight)
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
@@ -69,12 +64,12 @@ app.use((req, res, next) => {
 });
 
 /* -------------------------------------------------------
-   ✅ Express Middleware
-   ------------------------------------------------------- */
+   ✅ Middleware
+------------------------------------------------------- */
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Attach Razorpay instance globally
+// Attach Razorpay instance globally
 app.use((req, res, next) => {
   req.razorpay = razorpayInstance;
   next();
@@ -82,7 +77,7 @@ app.use((req, res, next) => {
 
 /* -------------------------------------------------------
    ✅ API Routes
-   ------------------------------------------------------- */
+------------------------------------------------------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/books", bookRoutes);
@@ -94,15 +89,14 @@ app.use("/api/paidBooks", paidBookRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/book-purchase", bookPurchaseRoutes);
 
-// ✅ Health check route (for uptime monitoring / debugging)
+// Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", time: new Date().toISOString() });
 });
 
 /* -------------------------------------------------------
-   ✅ Frontend serving (Vercel-friendly)
-   ------------------------------------------------------- */
-// ✅ Serve frontend (only in production)
+   ✅ Frontend (for production)
+------------------------------------------------------- */
 if (process.env.NODE_ENV === "production") {
   const clientBuildPath = path.join(__dirname, "../Frontend/dist");
   app.use(express.static(clientBuildPath));
@@ -113,5 +107,15 @@ if (process.env.NODE_ENV === "production") {
   app.get("/", (req, res) => res.send("🟢 API running (Development mode)"));
 }
 
-// ✅ Export the app (for Vercel Serverless)
+/* -------------------------------------------------------
+   ✅ Export for Vercel + Start local server
+------------------------------------------------------- */
 export default app;
+
+// 👇 Add this block so it runs locally too
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () =>
+    console.log(`🟢 Server running locally on port ${PORT}`)
+  );
+}
