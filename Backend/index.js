@@ -92,6 +92,18 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK", time: new Date().toISOString() });
 });
 
+// Debug route for Vercel runtime inspection
+app.get("/api/debug", (req, res) => {
+  res.json({
+    node_env: process.env.NODE_ENV,
+    mongoURI: process.env.MONGO_URI ? "✅ Loaded" : "❌ Missing",
+    razorpayKey: process.env.RAZORPAY_KEY_ID ? "✅ Loaded" : "❌ Missing",
+    razorpaySecret: process.env.RAZORPAY_KEY_SECRET ? "✅ Loaded" : "❌ Missing",
+    time: new Date().toISOString()
+  });
+});
+
+
 /* -------------------------------------------------------
    ✅ Serve Frontend in Production
 ------------------------------------------------------- */
