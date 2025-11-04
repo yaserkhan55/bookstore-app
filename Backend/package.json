@@ -1,16 +1,39 @@
 {
-  "name": "bookstore-backend",
+  "name": "bookstore",
   "version": "1.0.0",
-  "type": "module",
+  "description": "mern project",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
+  "engines": {
+    "node": "18.x "
   },
+  "type": "module",
+  "scripts": {
+    "start": "node Backend/index.js",
+    "dev": "nodemon Backend/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akhil2k-lc/bookStoreApp.git"
+  },
+  "author": "Akhil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akhil2k-lc/bookStoreApp/issues"
+  },
+  "homepage": "https://github.com/akhil2k-lc/bookStoreApp#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "dotenv": "^16.4.0",
-    "express": "^4.19.0",
-    "mongoose": "^7.6.0",
-    "razorpay": "^2.9.0"
+    "cheerio": "^1.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.19.0",
+    "mongoose": "^8.18.1",
+    "nodemailer": "^7.0.6",
+    "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
