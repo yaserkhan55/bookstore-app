@@ -4,12 +4,17 @@
     {
       "src": "Backend/api/index.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "Frontend/vite.config.js",
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "Backend/api/index.js"
-    }
-  ]
+    { "src": "/api/(.*)", "dest": "Backend/api/index.js" },
+    { "src": "/(.*)", "dest": "/Frontend/dist/$1" }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
