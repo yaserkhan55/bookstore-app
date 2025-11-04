@@ -7,8 +7,5 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "Backend/api/index.js" },
     { "src": "/(.*)", "dest": "/Frontend/dist/$1" }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
