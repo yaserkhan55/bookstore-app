@@ -119,6 +119,15 @@ if (process.env.NODE_ENV === "production") {
     res.send("🟢 API running in Development mode");
   });
 }
+app.get("/api/debug-env", (req, res) => {
+  res.json({
+    node_env: process.env.NODE_ENV,
+    mongo: process.env.MONGO_URI ? "✅ Loaded" : "❌ Missing",
+    razorpay_id: process.env.RAZORPAY_KEY_ID ? "✅" : "❌",
+    time: new Date().toISOString(),
+  });
+});
+
 
 /* -------------------------------------------------------
    ✅ Export for Vercel (Serverless)
