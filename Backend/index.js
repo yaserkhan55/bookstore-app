@@ -1,4 +1,4 @@
-// backend/index.js
+// Backend/index.js
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
@@ -35,21 +35,25 @@ connectDB()
   });
 
 /* -------------------------------------------------------
-   ✅ CORS Setup (Vercel + Local)
+   ✅ CORS Setup (Vercel + Local + Backend Domain)
 ------------------------------------------------------- */
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "https://bookstore-app-frontend-v1.vercel.app",
+  "https://bookstore-app-frontend-v1.vercel.app", // your live frontend
+  "https://bookstore-app-rfir.vercel.app", // your backend domain (for self-calls)
+  "https://bookstore-app-xhjc.vercel.app",
   "https://bookstore-app-xhjc-git-main-yaser-ahmed-khans-projects.vercel.app",
-  "https://bookstore-app-xhjc.vercel.app"
 ];
 
-
+// Allow all *.vercel.app previews dynamically
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  if (allowedOrigins.includes(origin)) {
+  if (
+    allowedOrigins.includes(origin) ||
+    (origin && origin.endsWith(".vercel.app"))
+  ) {
     res.header("Access-Control-Allow-Origin", origin);
   }
 
@@ -88,22 +92,31 @@ app.use("/api/paidBooks", paidBookRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/book-purchase", bookPurchaseRoutes);
 
-// Health Check
+/* -------------------------------------------------------
+   ✅ Health & Debug Routes
+------------------------------------------------------- */
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", time: new Date().toISOString() });
 });
 
-// Debug route for Vercel runtime inspection
 app.get("/api/debug", (req, res) => {
   res.json({
     node_env: process.env.NODE_ENV,
     mongoURI: process.env.MONGO_URI ? "✅ Loaded" : "❌ Missing",
     razorpayKey: process.env.RAZORPAY_KEY_ID ? "✅ Loaded" : "❌ Missing",
     razorpaySecret: process.env.RAZORPAY_KEY_SECRET ? "✅ Loaded" : "❌ Missing",
-    time: new Date().toISOString()
+    time: new Date().toISOString(),
   });
 });
 
+app.get("/api/debug-env", (req, res) => {
+  res.json({
+    node_env: process.env.NODE_ENV,
+    mongo: process.env.MONGO_URI ? "✅ Loaded" : "❌ Missing",
+    razorpay_id: process.env.RAZORPAY_KEY_ID ? "✅" : "❌",
+    time: new Date().toISOString(),
+  });
+});
 
 /* -------------------------------------------------------
    ✅ Serve Frontend in Production
@@ -120,15 +133,6 @@ if (process.env.NODE_ENV === "production") {
     res.send("🟢 API running in Development mode");
   });
 }
-app.get("/api/debug-env", (req, res) => {
-  res.json({
-    node_env: process.env.NODE_ENV,
-    mongo: process.env.MONGO_URI ? "✅ Loaded" : "❌ Missing",
-    razorpay_id: process.env.RAZORPAY_KEY_ID ? "✅" : "❌",
-    time: new Date().toISOString(),
-  });
-});
-
 
 /* -------------------------------------------------------
    ✅ Export for Vercel (Serverless)
@@ -136,7 +140,7 @@ app.get("/api/debug-env", (req, res) => {
 export default app;
 
 /* -------------------------------------------------------
-   ✅ Local Development (Manual Server Start)
+   ✅ Local Development
 ------------------------------------------------------- */
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
