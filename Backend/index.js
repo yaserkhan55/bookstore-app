@@ -45,6 +45,7 @@ const allowedOrigins = [
   "https://bookstore-app-xhjc.vercel.app"
 ];
 
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
