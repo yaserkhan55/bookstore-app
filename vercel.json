@@ -1,30 +1,13 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "Backend/index.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "Frontend/vite.config.js",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "Frontend/dist"
-      }
-    }
+    { "src": "Backend/index.js", "use": "@vercel/node" },
+    { "src": "Frontend/vite.config.js", "use": "@vercel/static-build" }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "Backend/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "Frontend/dist/$1"
-    }
+    { "src": "/api/(.*)", "dest": "Backend/index.js" },
+    { "src": "/(.*)", "dest": "Frontend/dist/$1" }
   ],
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "buildCommand": "cd Frontend && npm install && npm run build && cd ../Backend && npm install"
+  "buildCommand": "cd Frontend && npm install && npm run build",
+  "outputDirectory": "Frontend/dist"
 }
