@@ -49,10 +49,13 @@ const allowedOrigins = [
 // Allow all *.vercel.app previews dynamically
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-
   if (
-    allowedOrigins.includes(origin) ||
-    (origin && origin.endsWith(".vercel.app"))
+    [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "https://bookstore-app-frontend-v1.vercel.app",
+      "https://bookstore-app-rfir.vercel.app"
+    ].includes(origin)
   ) {
     res.header("Access-Control-Allow-Origin", origin);
   }
@@ -61,22 +64,10 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
 
-  if (req.method === "OPTIONS") return res.status(200).end();
-
+  if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
 
-/* -------------------------------------------------------
-   ✅ Middleware
-------------------------------------------------------- */
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// Attach Razorpay instance
-app.use((req, res, next) => {
-  req.razorpay = razorpayInstance;
-  next();
-});
 
 /* -------------------------------------------------------
    ✅ API Routes
