@@ -39,9 +39,8 @@ connectDB()
 ------------------------------------------------------- */
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "https://bookstore-app-frontend-v1.vercel.app",  // ✅ frontend on vercel
-  "https://bookstore-app-rfir.vercel.app",         // ✅ backend itself
+  "https://bookstore-app-frontend-v1.vercel.app",
+  "https://bookstore-app-rfir.vercel.app",
 ];
 
 app.use((req, res, next) => {
