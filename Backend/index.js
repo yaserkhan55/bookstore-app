@@ -40,34 +40,21 @@ connectDB()
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "https://bookstore-app-frontend-v1.vercel.app", // your live frontend
-  "https://bookstore-app-rfir.vercel.app", // your backend domain (for self-calls)
-  "https://bookstore-app-xhjc.vercel.app",
-  "https://bookstore-app-xhjc-git-main-yaser-ahmed-khans-projects.vercel.app",
+  "https://bookstore-app-frontend-v1.vercel.app",  // ✅ frontend on vercel
+  "https://bookstore-app-rfir.vercel.app",         // ✅ backend itself
 ];
 
-// Allow all *.vercel.app previews dynamically
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (
-    [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "https://bookstore-app-frontend-v1.vercel.app",
-      "https://bookstore-app-rfir.vercel.app"
-    ].includes(origin)
-  ) {
+  if (allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
   }
-
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") return res.sendStatus(200);
+  if (req.method === "OPTIONS") return res.status(200).end();
   next();
 });
-
 
 /* -------------------------------------------------------
    ✅ API Routes
