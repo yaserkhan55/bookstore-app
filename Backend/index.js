@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
-import razorpayInstance from "./config/razorpay.js";
+// import razorpayInstance from "./config/razorpay.js"; // Not used directly here, but ensures config load
 
 // Routes
 import userRoutes from "./route/users.route.js";
@@ -24,18 +24,17 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Standardize Port
+const PORT = process.env.PORT || 10000;
+
 /* -------------------------------------------------------
    ✅ Connect Database
 ------------------------------------------------------- */
-connectDB()
-  .then(() => console.log("✅ Database connected"))
-  .catch((err) => {
-    console.error("❌ DB connection failed:", err);
-    process.exit(1);
-  });
+// Connect to DB immediately
+connectDB();
 
 /* -------------------------------------------------------
-   ✅ CORS Setup (Vercel + Local + Backend Domain)
+   ✅ CORS Setup
 ------------------------------------------------------- */
 const allowedOrigins = [
   "http://localhost:5173",
@@ -50,6 +49,9 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
+  } else {
+    // Optional: Allow all during debugging if needed, or stick to strict whitelist
+    // res.header("Access-Control-Allow-Origin", "*");
   }
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
@@ -57,6 +59,9 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") return res.status(200).end();
   next();
 });
+
+// Middleware for parsing JSON
+app.use(express.json());
 
 /* -------------------------------------------------------
    ✅ API Routes
@@ -73,58 +78,30 @@ app.use("/api/purchases", purchaseRoutes);
 app.use("/api/book-purchase", bookPurchaseRoutes);
 
 /* -------------------------------------------------------
-   ✅ Health & Debug Routes
+   ✅ Health & Debug Routes (Render Requirement)
 ------------------------------------------------------- */
+app.get("/", (req, res) => {
+  res.send("Backend is running");
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", time: new Date().toISOString() });
 });
 
-app.get("/api/debug", (req, res) => {
-  res.json({
-    node_env: process.env.NODE_ENV,
-    mongoURI: process.env.MONGO_URI ? "✅ Loaded" : "❌ Missing",
-    razorpayKey: process.env.RAZORPAY_KEY_ID ? "✅ Loaded" : "❌ Missing",
-    razorpaySecret: process.env.RAZORPAY_KEY_SECRET ? "✅ Loaded" : "❌ Missing",
-    time: new Date().toISOString(),
-  });
+/* -------------------------------------------------------
+   ✅ Start Server (Unconditional)
+------------------------------------------------------- */
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    
+    // Log Env Var Status (Safety Check)
+    const requiredVars = ["MONGO_URI", "RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET"];
+    requiredVars.forEach(key => {
+        if (!process.env[key]) {
+            console.warn(`⚠️  WARNING: Missing environment variable: ${key}`);
+        } else {
+             console.log(`✅ ${key} loaded`);
+        }
+    });
 });
-
-app.get("/api/debug-env", (req, res) => {
-  res.json({
-    node_env: process.env.NODE_ENV,
-    mongo: process.env.MONGO_URI ? "✅ Loaded" : "❌ Missing",
-    razorpay_id: process.env.RAZORPAY_KEY_ID ? "✅" : "❌",
-    time: new Date().toISOString(),
-  });
-});
-
-/* -------------------------------------------------------
-   ✅ Serve Frontend in Production
-------------------------------------------------------- */
-if (process.env.NODE_ENV === "production") {
-  const clientPath = path.resolve(__dirname, "../Frontend/dist");
-  app.use(express.static(clientPath));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(clientPath, "index.html"));
-  });
-} else {
-  app.get("/", (req, res) => {
-    res.send("🟢 API running in Development mode");
-  });
-}
-
-/* -------------------------------------------------------
-   ✅ Export for Vercel (Serverless)
-------------------------------------------------------- */
-export default app;
-
-/* -------------------------------------------------------
-   ✅ Local Development
-------------------------------------------------------- */
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running locally on port ${PORT}`);
-  });
-}
